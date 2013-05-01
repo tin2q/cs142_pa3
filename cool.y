@@ -87,7 +87,22 @@ int omerrs = 0;               /* number of errors in lexing and parsing */
 %type <expression> expr
 
 /* Precedence declarations go here. */
+/* Lowest to highest pg17 cool manual*/
+%right ASSIGN
+%left NOT
+%nonassoc LE '<' '='
+%left '+' '-'
+%left '*' '/'
+%left ISVOID
+%left '~'
+%left '@'
+%left '.'
 
+/*
+   Using cool_manual.pdf pg16: Figure 1: Cool Syntax
+   Constructors from cool-tree.aps
+   cool-tree.h for functions such as single_Classes, etc...
+*/
 
 %%
 /* 
@@ -124,20 +139,22 @@ feature_list
   ;
 
 feature 
-  : OBJECTID '(' formal_list ')' ':' TYPEID '{' expr '}' ';'
+  : OBJECTID '(' formal_list ')' ':' TYPEID '{' expr '}' ';' /*method*/
     { $$ = method($1, $3, $6, $8 ); /*name, formal, return type, expr*/ 
                   }
-  | OBJECTID ':' TYPEID ';'
+  | OBJECTID ':' TYPEID ';' /*empty attribute*/
     { $$ = attr( $1, $3, assign( $1, no_expr()));  /*name, type, expression */ 
                   }
-  | OBJECTID ':' TYPEID ASSIGN expr ';'
+  | OBJECTID ':' TYPEID ASSIGN expr ';' /* attribute and assign value*/
     { $$ = attr( $1, $3, assign( $1, $5 ) );
                   }
   ;
 
-/* Parameters one or more formal, [formals]*/
+/* Parameters. One or more: formal, [formals]*/
 formal_list 
-  : formal
+  :   /* empty */
+    { $$ = nil_Formals(); }
+  | formal
     { $$ = single_Formals($1);}
   | formal ',' formal_list
     { $$ = append_Formals(single_Formals($1),$3); }
@@ -148,12 +165,20 @@ formal
     { $$ = formal( $1, $3); }
   ;
 
-expr_list :
-  {}
+expr_list /*one or more expressions*/
+  : expr
+    { $$ = single_Expressions($1); }
+  | expr_list ',' expr 
+    { $$ = append_Expressions($1, single_Expressions($3)) ;}
   ;
 
-expr :
-  {}
+expr 
+  : OBJECTID ASSIGN expr /* assign */
+    { $$ = assign($1, $3); }
+  | expr '.' OBJECTID '(' expr_list ')'
+    { $$ = dispatch( $1, $3, $5 ); /* expr, name, actual exp*/}
+  | expr '.' '@' TYPEID '.' OBJECTID '(' expr_list ')' /*static dispatch*/
+    { $$ = static_dispatch( $1, $4, $6, $8 ); /*expr, type, name, actual exps */}
   ;
 /* end of grammar */
 %%
