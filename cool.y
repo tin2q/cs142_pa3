@@ -15,11 +15,12 @@
                                     for the location of tokens */
 /* The default action for locations.  Use the location of the first
    terminal/non-terminal. */
+extern int node_lineno;
 #define YYLLOC_DEFAULT(Current, Rhs, N)         \
-  Current = Rhs[1];
+  Current = Rhs[1];\
+  node_lineno = Current;
 
 extern char *curr_filename;
-
 void yyerror(const char *s);        /*  defined below; called for each parse error */
 extern int yylex();           /*  the entry point to the lexer  */
 
@@ -91,6 +92,7 @@ int omerrs = 0;               /* number of errors in lexing and parsing */
 
 /* Precedence declarations go here. */
 /* Lowest to highest pg17 cool manual*/
+
 %right ASSIGN
 %left NOT
 %nonassoc LE '<' '='
@@ -195,9 +197,41 @@ expr
   | '{' expr_list '}'
     { $$ = block($2); }
   | LET let_init
-    { $$ = $2}
+    { $$ = $2; }
   | CASE expr OF cases ESAC
     { $$ = typcase($2, $4); }
+  | NEW TYPEID
+    { $$ = new_($2); }
+  | ISVOID expr
+    { $$ = isvoid($2); }
+  | expr '+' expr
+    { $$ = plus($1, $3); }
+  | expr '-' expr
+    { $$ = sub($1, $3); }
+  | expr '*' expr
+    { $$ = mul($1, $3); }
+  | expr '/' expr
+    { $$ = divide($1, $3); }
+  | '~' expr
+    { $$ = neg($2); }
+  | expr '<' expr
+    { $$ = lt($1, $3); }
+  | expr LE  expr
+    { $$ = leq($1, $3); }
+  | expr '=' expr
+    { $$ = eq($1, $3); }
+  | NOT expr
+    { $$ = comp($2); }
+  | '(' expr ')'
+    { $$ = $2;}
+  | OBJECTID
+    { $$ = object($1); }
+  | INT_CONST
+    { $$ = int_const($1); }
+  | STR_CONST
+    { $$ = string_const($1); }
+  | BOOL_CONST
+    { $$ = bool_const($1); }
   ;
 
 let_init
@@ -215,7 +249,7 @@ cases
   : case
     { $$ = single_Cases($1); }
   | cases case
-    { $$ = append_Cases($1, single_Cases($1)); }
+    { $$ = append_Cases($1, single_Cases($2)); }
   ;
 
 case
