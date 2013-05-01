@@ -533,7 +533,7 @@ static const yytype_int8 yyrhs[] =
 /* YYRLINE[YYN] -- source line where rule number YYN was defined.  */
 static const yytype_uint8 yyrline[] =
 {
-       0,   111,   111,   115,   118,   125,   128,   135,   136,   145
+       0,   114,   114,   118,   121,   128,   131,   138,   139,   148
 };
 #endif
 
@@ -1522,14 +1522,14 @@ yyreduce:
         case 2:
 
 /* Line 1806 of yacc.c  */
-#line 111 "cool.y"
+#line 114 "cool.y"
     { (yyloc) = (yylsp[(1) - (1)]); ast_root = program((yyvsp[(1) - (1)].classes)); }
     break;
 
   case 3:
 
 /* Line 1806 of yacc.c  */
-#line 116 "cool.y"
+#line 119 "cool.y"
     { (yyval.classes) = single_Classes((yyvsp[(1) - (1)].class_));
                   parse_results = (yyval.classes); }
     break;
@@ -1537,7 +1537,7 @@ yyreduce:
   case 4:
 
 /* Line 1806 of yacc.c  */
-#line 119 "cool.y"
+#line 122 "cool.y"
     { (yyval.classes) = append_Classes((yyvsp[(1) - (2)].classes),single_Classes((yyvsp[(2) - (2)].class_))); 
                   parse_results = (yyval.classes); }
     break;
@@ -1545,7 +1545,7 @@ yyreduce:
   case 5:
 
 /* Line 1806 of yacc.c  */
-#line 126 "cool.y"
+#line 129 "cool.y"
     { (yyval.class_) = class_((yyvsp[(2) - (6)].symbol),idtable.add_string("Object"),(yyvsp[(4) - (6)].features),
 			      stringtable.add_string(curr_filename)); }
     break;
@@ -1553,21 +1553,21 @@ yyreduce:
   case 6:
 
 /* Line 1806 of yacc.c  */
-#line 129 "cool.y"
+#line 132 "cool.y"
     { (yyval.class_) = class_((yyvsp[(2) - (8)].symbol),(yyvsp[(4) - (8)].symbol),(yyvsp[(6) - (8)].features),stringtable.add_string(curr_filename)); }
     break;
 
   case 7:
 
 /* Line 1806 of yacc.c  */
-#line 135 "cool.y"
+#line 138 "cool.y"
     {  (yyval.features) = nil_Features(); }
     break;
 
   case 8:
 
 /* Line 1806 of yacc.c  */
-#line 137 "cool.y"
+#line 140 "cool.y"
     { (yyval.features) = append_Features((yyvsp[(1) - (2)].features),single_Features((yyvsp[(2) - (2)].feature))); 
                   }
     break;
@@ -1575,7 +1575,7 @@ yyreduce:
   case 9:
 
 /* Line 1806 of yacc.c  */
-#line 146 "cool.y"
+#line 149 "cool.y"
     { (yyval.feature) = attr( (yyvsp[(1) - (4)].symbol), (yyvsp[(3) - (4)].symbol), assign( (yyvsp[(1) - (4)].symbol), no_expr()));  /*name, type, expression */ 
                   }
     break;
@@ -1821,7 +1821,7 @@ yyreturn:
 
 
 /* Line 2067 of yacc.c  */
-#line 184 "cool.y"
+#line 227 "cool.y"
 
 
 /* This function is called automatically when Bison detects a parse error. */

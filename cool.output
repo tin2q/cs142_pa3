@@ -4,6 +4,9 @@ Nonterminals useless in grammar
    formal
    expr_list
    expr
+   let_init
+   cases
+   case
 
 
 Terminals unused in grammar
@@ -57,10 +60,28 @@ Rules useless in grammar
 
    15 expr_list: expr
    16          | expr_list ',' expr
+   17          | expr ';'
+   18          | expr ';' expr_list
 
-   17 expr: OBJECTID ASSIGN expr
-   18     | expr '.' OBJECTID '(' expr_list ')'
-   19     | expr '.' '@' TYPEID '.' OBJECTID '(' expr_list ')'
+   19 expr: OBJECTID ASSIGN expr
+   20     | expr '.' OBJECTID '(' expr_list ')'
+   21     | expr '.' '@' TYPEID '.' OBJECTID '(' expr_list ')'
+   22     | OBJECTID '(' expr_list ')'
+   23     | IF expr THEN expr ELSE expr FI
+   24     | WHILE expr LOOP expr POOL
+   25     | '{' expr_list '}'
+   26     | LET let_init
+   27     | CASE expr OF cases ESAC
+
+   28 let_init: OBJECTID ':' TYPEID IN expr
+   29         | OBJECTID ':' TYPEID ASSIGN expr IN expr
+   30         | OBJECTID ':' TYPEID ',' let_init
+   31         | OBJECTID ':' TYPEID ASSIGN expr ',' let_init
+
+   32 cases: case
+   33      | cases case
+
+   34 case: OBJECTID ':' TYPEID DARROW expr ';'
 
 
 Grammar
