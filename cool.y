@@ -149,10 +149,10 @@ feature
     { $$ = method($1, $3, $6, $8 ); /*name, formal, return type, expr*/ 
                   }
   | OBJECTID ':' TYPEID ';' /*empty attribute*/
-    { $$ = attr( $1, $3, assign( $1, no_expr()));  /*name, type, expression */ 
+    { $$ = attr( $1, $3, no_expr());  /*name, type, expression */ 
                   }
   | OBJECTID ':' TYPEID ASSIGN expr ';' /* attribute and assign value*/
-    { $$ = attr( $1, $3, assign( $1, $5 ) );
+    { $$ = attr( $1, $3, $5 );
                   }
   ;
 
@@ -191,8 +191,8 @@ expr
   /* dispatch */
   | expr '.' OBJECTID '(' expr_list ')' /* class.function( ya ) */
     { $$ = dispatch( $1, $3, $5 ); /* expr, name, actual exp*/}
-  | expr '.' '@' TYPEID '.' OBJECTID '(' expr_list ')' /*static dispatch*/
-    { $$ = static_dispatch( $1, $4, $6, $8 ); /*expr, type, name, actual exps */}
+  | expr '@' TYPEID '.' OBJECTID '(' expr_list ')' /*static dispatch*/
+    { $$ = static_dispatch( $1, $3, $5, $7 ); /*expr, type, name, actual exps */}
   | OBJECTID '(' expr_list ')' /* self_type dispatch */
     { $$ = dispatch ( object(idtable.add_string("self")) , $1, $3); 
       /* myfunc() is like self.myfunc() */
@@ -208,8 +208,8 @@ expr
        * Expressions instead of Expression
        */
     } 
-  | expr '.' '@' TYPEID '.' OBJECTID '(' ')'
-    { $$ = static_dispatch( $1, $4, $6, nil_Expressions()); }
+  | expr '@' TYPEID '.' OBJECTID '(' ')'
+    { $$ = static_dispatch( $1, $3, $5, nil_Expressions()); }
   | OBJECTID '(' ')'
     { $$ = dispatch ( object(idtable.add_string("self")), $1, nil_Expressions()); }
 
