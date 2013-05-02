@@ -133,6 +133,8 @@ class
 			      stringtable.add_string(curr_filename)); }
 	| CLASS TYPEID INHERITS TYPEID '{' feature_list '}' ';'
 		{ $$ = class_($2,$4,$6,stringtable.add_string(curr_filename)); }
+  | error '{' feature_list '}' ';' /*error and read until ; and continue*/
+    {  yyerrok;    }
 	;
 
 /* Feature list may be empty, but no empty features in list. */
@@ -140,8 +142,9 @@ feature_list
   :		/* empty */  
                 {  $$ = nil_Features(); }
   | feature_list feature
-    { $$ = append_Features($1,single_Features($2)); 
-                  }
+    { $$ = append_Features($1,single_Features($2)); }
+  | feature_list error ';'
+    { $$ = nil_Features(); /*yyerrok;*/ }
   ;
 
 feature 
@@ -152,8 +155,9 @@ feature
     { $$ = attr( $1, $3, no_expr());  /*name, type, expression */ 
                   }
   | OBJECTID ':' TYPEID ASSIGN expr ';' /* attribute and assign value*/
-    { $$ = attr( $1, $3, $5 );
-                  }
+    { $$ = attr( $1, $3, $5 ); }
+  | OBJECTID '(' formal_list ')' ':' TYPEID '{' error '}' ';'
+    { yyerrok;}
   ;
 
 /* Parameters. One or more: formal, [formals]*/
@@ -164,6 +168,8 @@ formal_list
     { $$ = single_Formals($1);}
   | formal ',' formal_list
     { $$ = append_Formals(single_Formals($1),$3); }
+  | error formal_list 
+    { $$ =  nil_Formals(); } 
   ;
 
 formal 
@@ -182,6 +188,10 @@ expr_block /* for expression blocks */
     { $$ = single_Expressions($1); }
   | expr ';' expr_block
     { $$ = append_Expressions(single_Expressions($1), $3) ;}
+  | error ';'
+    { $$ = nil_Expressions(); }
+  | error ';' expr_block 
+    { $$ = nil_Expressions(); }
   ;
 
 expr 
@@ -255,6 +265,10 @@ expr
     { $$ = string_const($1); }
   | BOOL_CONST
     { $$ = bool_const($1); }
+  | '(' error ')'
+    { yyerrok; }
+  | '{' error '}'
+    {yyerrok; }
   ;
 
 let_init
@@ -266,6 +280,10 @@ let_init
     { $$ = let ( $1, $3, no_expr(), $5 ); }
   | OBJECTID ':' TYPEID ASSIGN expr ',' let_init
     { $$ = let ( $1, $3, $5, $7 ); }
+  | error IN expr  %prec LETIN
+    { yyerrok; }
+  | error ',' let_init
+    { yyerrok; }
   ;
 
 cases
