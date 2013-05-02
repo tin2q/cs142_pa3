@@ -187,12 +187,32 @@ expr_block /* for expression blocks */
 expr 
   : OBJECTID ASSIGN expr /* assign */
     { $$ = assign($1, $3); }
-  | expr '.' OBJECTID '(' expr_list ')'
+  
+  /* dispatch */
+  | expr '.' OBJECTID '(' expr_list ')' /* class.function( ya ) */
     { $$ = dispatch( $1, $3, $5 ); /* expr, name, actual exp*/}
   | expr '.' '@' TYPEID '.' OBJECTID '(' expr_list ')' /*static dispatch*/
     { $$ = static_dispatch( $1, $4, $6, $8 ); /*expr, type, name, actual exps */}
   | OBJECTID '(' expr_list ')' /* self_type dispatch */
-    { $$ = dispatch ( object(idtable.add_string("self")) , $1, $3); }
+    { $$ = dispatch ( object(idtable.add_string("self")) , $1, $3); 
+      /* myfunc() is like self.myfunc() */
+    }
+   /* no args function( ) 
+    * I have to do this because expr_list is meant for one or more
+    * rather than 0 or more
+    */
+  | expr '.' OBJECTID '(' ')'
+    { $$ = dispatch ( $1, $3, nil_Expressions()); 
+      /* Here is use nil_Expressions instead of no_expr() 
+       * because the it's asking for
+       * Expressions instead of Expression
+       */
+    } 
+  | expr '.' '@' TYPEID '.' OBJECTID '(' ')'
+    { $$ = static_dispatch( $1, $4, $6, nil_Expressions()); }
+  | OBJECTID '(' ')'
+    { $$ = dispatch ( object(idtable.add_string("self")), $1, nil_Expressions()); }
+
   | IF expr THEN expr ELSE expr FI 
     { $$ = cond( $2, $4, $6 ); /* pred, then_exp, else_exp*/ }
   | WHILE expr LOOP expr POOL
