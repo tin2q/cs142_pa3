@@ -85,6 +85,7 @@ int omerrs = 0;               /* number of errors in lexing and parsing */
 %type <formals> formal_list
 %type <formal> formal
 %type <expressions> expr_list
+%type <expressions> expr_block
 %type <expression> expr
 %type <expression> let_init
 %type <case_> case
@@ -92,7 +93,7 @@ int omerrs = 0;               /* number of errors in lexing and parsing */
 
 /* Precedence declarations go here. */
 /* Lowest to highest pg17 cool manual*/
-
+%right LETIN
 %right ASSIGN
 %left NOT
 %nonassoc LE '<' '='
@@ -170,14 +171,16 @@ formal
     { $$ = formal( $1, $3); }
   ;
 
-expr_list /*one or more expressions*/
+expr_list /*one or more expressions separated by coma*/
   : expr
     { $$ = single_Expressions($1); }
   | expr_list ',' expr 
     { $$ = append_Expressions($1, single_Expressions($3)) ;}
-  | expr ';' 
+  ;
+expr_block /* for expression blocks */
+  : expr ';' 
     { $$ = single_Expressions($1); }
-  | expr ';' expr_list
+  | expr ';' expr_block
     { $$ = append_Expressions(single_Expressions($1), $3) ;}
   ;
 
@@ -194,7 +197,7 @@ expr
     { $$ = cond( $2, $4, $6 ); /* pred, then_exp, else_exp*/ }
   | WHILE expr LOOP expr POOL
     { $$ = loop( $2, $4 ); /* pred, body*/}
-  | '{' expr_list '}'
+  | '{' expr_block '}'
     { $$ = block($2); }
   | LET let_init
     { $$ = $2; }
@@ -235,9 +238,9 @@ expr
   ;
 
 let_init
-  : OBJECTID ':' TYPEID IN expr 
+  : OBJECTID ':' TYPEID IN expr %prec LETIN
     { $$ = let( $1, $3, no_expr(), $5 );}
-  | OBJECTID ':' TYPEID ASSIGN expr IN expr
+  | OBJECTID ':' TYPEID ASSIGN expr IN expr %prec LETIN
     { $$ = let( $1, $3, $5, $7 ); }
   | OBJECTID ':' TYPEID ',' let_init 
     { $$ = let ( $1, $3, no_expr(), $5 ); }
